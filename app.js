@@ -122,7 +122,7 @@ app.get('/list', function (req, res, next) {
         } else {
           return 0;
         }
-      }), function (a, b) { return a + b; });    
+      }), function (a, b) { return a + b; }, 0);    
       
       res.render('list', {
         websites: websites

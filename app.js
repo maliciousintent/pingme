@@ -58,7 +58,7 @@ app.get('/', function (req, res, next) {
       } else {
         return 0;
       }
-    }), function (a, b) { return a + b; });    
+    }), function (a, b) { return a + b; }, 10);    
     offline = Object.size(statuses) - online;
     
     res.render('index', {

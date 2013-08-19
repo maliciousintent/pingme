@@ -1,0 +1,34 @@
+extends layout
+block content
+
+  h3 Websites health checks
+  
+  table.table.table-striped.table-hover
+    thead
+      tr
+        th &nbsp;
+        th Name
+        th Response time (ms)
+        th Last check
+        th.text-center Status
+    tbody
+      for url, name in websites
+        tr
+          td
+            form(action='/delete', method='post')
+              input(type='hidden', name='_method', value='delete')
+              input(type='hidden', name='name', value=name)
+              button.btn.btn-xs(type='submit')
+                span.text-muted.glyphicon.glyphicon-trash
+          td
+            a(href='#{url}', target='_blank') #{name}
+          td #{statuses[name] && statuses[name][2]}
+          td #{statuses[name] && statuses[name][1]}
+          td.text-center
+            if statuses[name] && statuses[name][0] === 'ok'
+              if statuses[name] && statuses[name][2] > timeout_ms
+                span.text-warning.glyphicon.glyphicon-time
+              else
+                span.text-success.glyphicon.glyphicon-ok
+            else
+              span.text-danger.glyphicon.glyphicon-remove

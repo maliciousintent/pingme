@@ -1,0 +1,36 @@
+doctype 5
+html
+  head
+    title Ping
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.0-wip/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap-glyphicons.css')
+    link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Maven+Pro:400,700')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    style.
+      body, p, h1, h2, h3 {
+        font-family: 'Maven Pro', sans-serif;
+      }
+      
+      h3 {
+        margin-top: 0;
+      }
+      
+      .jumbotron {
+        text-align: center;
+        background-color: transparent;
+        padding-bottom: 20px;
+      }
+
+  body
+    
+    .container(style='padding-top: 50px;')
+      
+      .jumbotron
+          h1(style='cursor:pointer;', onclick='window.location.href="/";') Ping
+          p.lead.text-muted Monitor your websites
+    
+      .row
+        .col-lg-6.col-lg-offset-3
+    
+          block content
+          

@@ -12,7 +12,8 @@ var express = require('express')
   , path = require('path')
   , redis = require('redis')
   , moment = require('moment')
-  , async = require('async');
+  , async = require('async')
+  , flash = require('connect-flash');
   
 var app = express()
   , rclient = redis.createClient();
@@ -31,6 +32,9 @@ app.set('view engine', 'jade');
 app.use(express.logger('dev'));
 app.use(express.bodyParser());
 app.use(express.methodOverride());
+app.use(express.cookieParser());
+app.use(express.session({ secret: 'alksdmfjiolwmf' }));
+app.use(flash());
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.errorHandler());
@@ -75,7 +79,8 @@ app.post('/add', function (req, res) {
   }
   
   rclient.hset('websites', name, url, function () {
-    return res.status(201).end('Website added.');
+    req.flash('message', 'Website "' + name + '" added.');
+    return res.redirect('/list');
   });
 });
 
@@ -89,7 +94,8 @@ app.del('/delete', function (req, res) {
   
   rclient.hdel('websites', name, function () {
     rclient.hdel('websites-status', name, function () {
-      return res.status(201).end('Website removed.');
+      req.flash('message', 'Website "' + name + '" removed.');
+      return res.redirect('/list');
     });
   });
 });
@@ -112,6 +118,7 @@ app.get('/list', function (req, res, next) {
         websites: websites
       , statuses: Object.map(statuses, function (key, value) { var ret = value.split('|'); ret[2] = moment(ret[2]).fromNow(); return ret; })
       , timeout_ms: 300
+      , message: req.flash('message')
       });
     });
   });
@@ -138,20 +145,26 @@ function _worker() {
       
       async.waterfall([
         function _request(nextSeries) {
-          http.get(websites[name], function (res) {
+          var req = http.request(websites[name], function (res) {
             nextSeries(null, {
               ok: (res.statusCode === 200) ? 'ok' : 'no'
             , code: res.statusCode
             , resptime: new Date().valueOf() - resptime
             });
-              
-          }).on('error', function (e) {
+          });
+          
+          req.on('error', function (e) {
             nextSeries(null, {
               ok: 'no'
             , code: e.errno
-            , resptime: 0
+            , resptime: '(TIMEOUT)'
             });
           });
+          
+          req.setTimeout(5000, function () {
+            req.abort();
+          });
+          req.end();
         },
         
         function _complete(status, nextSeries) {
@@ -169,7 +182,7 @@ function _worker() {
     });
   });
 }
-setTimeout(_worker, 5000);
+setTimeout(_worker, 1000);
 
 
 // -$- Utils -$-

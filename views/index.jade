@@ -1,35 +1,38 @@
 extends layout
 block content
 
-  .text-center
-    h3 Create a new Health Check
-    hr
+  .row
+    .col-lg-6.col-lg-offset-3
 
-  form.form-horizontal(role='form', method='post', action='/add')
-    fieldset
-    
-      .form-group
-        label.col-lg-3.control-label Name
-        .col-lg-9
-          input.form-control(type='text', name='name', placeholder='Unique identifier for this monitor', required)
-            
-      .form-group
-        label.col-lg-3.control-label Website URL
-        .col-lg-9
-          input.form-control(type='url', name='url', placeholder='Type the URL to ping', required)
+      .text-center
+        h3 Create a new Health Check
+        hr
+
+      form.form-horizontal(role='form', method='post', action='/add')
+        fieldset
         
-      .form-group
-        .col-lg-12
-          button.btn.btn-default.btn-lg.btn-success.pull-right(type='submit')
-            | Create
+          .form-group
+            label.col-lg-3.control-label Name
+            .col-lg-9
+              input.form-control(type='text', name='name', placeholder='Unique identifier for this monitor', required)
+                
+          .form-group
+            label.col-lg-3.control-label Website URL
+            .col-lg-9
+              input.form-control(type='url', name='url', placeholder='Type the URL to ping', required)
+            
+          .form-group
+            .col-lg-12
+              button.btn.btn-default.btn-lg.btn-success.pull-right(type='submit')
+                | Create
 
-  hr
-  
-  p.text-center
-    a(href='/list') Current status:
-    | &nbsp;
-    span.text-danger
-      strong #{offline} offline
-    |  and 
-    span.text-success
-      strong #{online} online
+      hr
+      
+      p.text-center
+        a(href='/list') Current status:
+        | &nbsp;
+        span.text-danger
+          strong #{offline} offline
+        |  and 
+        span.text-success
+          strong #{online} online

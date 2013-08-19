@@ -107,6 +107,8 @@ app.get('/list', function (req, res, next) {
       return next(err);
     }
     
+    websites = websites || {};
+    
     rclient.hgetall('websites-status', function (err, statuses) {
       if (err) {
         return next(err);
@@ -148,6 +150,8 @@ function _worker() {
     if (err) {
       throw err;
     }
+    
+    websites = websites || {};
     
     async.each(Object.keys(websites), function (name, nextEach) {
       var resptime = new Date().valueOf();

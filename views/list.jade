@@ -43,3 +43,16 @@ block content
                     span.text-success.glyphicon.glyphicon-ok
                 else
                   span.text-danger.glyphicon.glyphicon-remove
+
+
+      p.text-center.text-muted
+        input#autorefresh(type='checkbox', value='1', checked='checked')
+        | &nbsp;Autorefresh (every 5s)
+        
+        
+  script.
+    setInterval(function () {
+      if (document.querySelector('#autorefresh').checked) {
+        window.location.reload();
+      }
+    }, 5000);

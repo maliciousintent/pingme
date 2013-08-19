@@ -19,6 +19,7 @@ var app = express()
 
 rclient.on('error', function (err) {
   console.log('REDIS ERROR', err);
+  throw err;
 });
 
 
@@ -37,8 +38,31 @@ app.use(express.errorHandler());
 
 // -$- Routes -$-
 
-app.get('/', function (req, res) {
-  res.render('index');
+app.get('/', function (req, res, next) {
+  
+  rclient.hgetall('websites-status', function (err, statuses) {
+    if (err) {
+      return next(err);
+    }
+    
+    statuses = statuses || {};
+    
+    var online, offline;
+    online = Object.reduce(Object.map(statuses, function (key, value) { 
+      if (value.split('|')[0] === 'ok') {
+        return 1;
+      } else {
+        return 0;
+      }
+    }), function (a, b) { return a + b; });    
+    offline = Object.size(statuses) - online;
+    
+    res.render('index', {
+      online: online
+    , offline: offline
+    });
+  });
+  
 });
 
 
@@ -64,7 +88,9 @@ app.del('/delete', function (req, res) {
   }
   
   rclient.hdel('websites', name, function () {
-    return res.status(201).end('Website removed.');
+    rclient.hdel('websites-status', name, function () {
+      return res.status(201).end('Website removed.');
+    });
   });
 });
 
@@ -84,7 +110,7 @@ app.get('/list', function (req, res, next) {
       
       res.render('list', {
         websites: websites
-      , statuses: Object.map(statuses, function (key, value) { var ret = value.split('|'); ret[1] = moment(ret[1]).fromNow(); return ret; })
+      , statuses: Object.map(statuses, function (key, value) { var ret = value.split('|'); ret[2] = moment(ret[2]).fromNow(); return ret; })
       , timeout_ms: 300
       });
     });
@@ -107,35 +133,41 @@ function _worker() {
       throw err;
     }
     
-    async.forEach(Object.keys(websites), function (name, nextEach) {
+    async.each(Object.keys(websites), function (name, nextEach) {
       var resptime = new Date().valueOf();
       
       async.waterfall([
         function _request(nextSeries) {
           http.get(websites[name], function (res) {
-            console.log('Status code', res.statusCode);
-            
             nextSeries(null, {
               ok: (res.statusCode === 200) ? 'ok' : 'no'
-            , resptime: (res.statusCode === 200) ? new Date().valueOf() - resptime : res.statusCode
+            , code: res.statusCode
+            , resptime: new Date().valueOf() - resptime
             });
               
           }).on('error', function (e) {
             nextSeries(null, {
               ok: 'no'
-            , resptime: e.errno
+            , code: e.errno
+            , resptime: 0
             });
           });
         },
         
         function _complete(status, nextSeries) {
-          rclient.hset('websites-status', name, [status.ok, new Date(), status.resptime].join('|'), nextSeries);
+          rclient.hset('websites-status', name, [status.ok, status.code, new Date(), status.resptime].join('|'), function () {
+            nextSeries();
+          });
         }
-      ], nextEach);
+      ], function () {
+        nextEach();
+      });
+      
+    }, function _forEachComplete() {
+      console.log('Worker exited.');
+      setTimeout(_worker, 5000);
     });
   });
-  
-  setTimeout(_worker, 5000);
 }
 setTimeout(_worker, 5000);
 

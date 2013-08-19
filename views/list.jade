@@ -1,14 +1,17 @@
 extends layout
 block content
 
-  h3 Websites health checks
+  .text-center
+    h3 Websites health checks
+    hr
   
   table.table.table-striped.table-hover
     thead
       tr
         th &nbsp;
         th Name
-        th Response time (ms)
+        th HTTP / Socket
+        th Response time
         th Last check
         th.text-center Status
     tbody
@@ -22,8 +25,9 @@ block content
                 span.text-muted.glyphicon.glyphicon-trash
           td
             a(href='#{url}', target='_blank') #{name}
-          td #{statuses[name] && statuses[name][2]}
           td #{statuses[name] && statuses[name][1]}
+          td #{statuses[name] && statuses[name][3]} ms
+          td #{statuses[name] && statuses[name][2]}
           td.text-center
             if statuses[name] && statuses[name][0] === 'ok'
               if statuses[name] && statuses[name][2] > timeout_ms

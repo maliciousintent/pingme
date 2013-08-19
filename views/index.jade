@@ -1,6 +1,10 @@
 extends layout
 block content
 
+  .text-center
+    h3 Create a new Health Check
+    hr
+
   form.form-horizontal(role='form', method='post', action='/add')
     fieldset
     
@@ -17,15 +21,15 @@ block content
       .form-group
         .col-lg-12
           button.btn.btn-default.btn-lg.btn-success.pull-right(type='submit')
-            span.glyphicon.glyphicon-plus
-            | &nbsp;Create
+            | Create
 
   hr
   
   p.text-center
-    strong
-      a(href='/list') Current status:
+    a(href='/list') Current status:
     | &nbsp;
-    span.text-danger 0 offline
+    span.text-danger
+      strong #{offline} offline
     |  and 
-    span.text-success 1 online
+    span.text-success
+      strong #{online} online

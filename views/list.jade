@@ -1,4 +1,10 @@
 extends layout
+block favicon
+  if offline === 0
+    link(rel='icon', href='/img/ok.ico?v=2')
+  else
+    link(rel='icon', href='/img/ko.ico?v=2')
+
 block content
 
   .row

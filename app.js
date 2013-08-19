@@ -114,10 +114,19 @@ app.get('/list', function (req, res, next) {
       
       statuses = statuses || {};
       
+      var offline = Object.reduce(Object.map(statuses, function (key, value) { 
+        if (value.split('|')[0] !== 'ok') {
+          return 1;
+        } else {
+          return 0;
+        }
+      }), function (a, b) { return a + b; });    
+      
       res.render('list', {
         websites: websites
       , statuses: Object.map(statuses, function (key, value) { var ret = value.split('|'); ret[2] = moment(ret[2]).fromNow(); return ret; })
       , timeout_ms: 300
+      , offline: offline
       , message: req.flash('message')
       });
     });

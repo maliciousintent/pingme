@@ -7,18 +7,34 @@ block favicon
 
 block content
 
+  .page-header.row
+    .col-lg-7.col-lg-offset-2(style='cursor:pointer;', onclick='document.location.href="/";')
+      h1 Ping 
+        span.text-muted &mdash; Websites health checks
+        
+    .col-lg-1
+      h1.pull-right
+        if offline === 0
+          span.text-success.glyphicon.glyphicon-ok
+        else
+          span.text-danger.glyphicon.glyphicon-remove
+        | &nbsp;
+
   .row
     .col-lg-8.col-lg-offset-2
-
-      .text-center
-        h3 Websites health checks
-        hr
       
       if message && message.length
         .alert.alert-info
           p #{message}
       
-      table.table.table-striped.table-hover
+      if offline > 0
+        .alert.alert-danger
+          p
+            strong Warning
+            br 
+            | One or more websites are currently offline. Please investigate.
+      
+      table.table.table-striped.table-hover.table-condensed
         thead
           tr
             th &nbsp;
@@ -29,7 +45,7 @@ block content
             th.text-center Status
         tbody
           for url, name in websites
-            tr
+            tr(class="#{(statuses[name] && statuses[name][0] !== 'ok') ? 'danger' : ''}")
               td
                 form(action='/delete', method='post')
                   input(type='hidden', name='_method', value='delete')
@@ -53,7 +69,7 @@ block content
 
       p.text-center.text-muted
         input#autorefresh(type='checkbox', value='1', checked='checked')
-        | &nbsp;Autorefresh (every 5s)
+        | &nbsp;Autorefresh (every #{interval / 2 / 1000}s)
         
         
   script.
@@ -61,4 +77,4 @@ block content
       if (document.querySelector('#autorefresh').checked) {
         window.location.reload();
       }
-    }, 5000);
+    }, #{interval / 2});

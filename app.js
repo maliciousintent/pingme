@@ -5,6 +5,11 @@
 var NOTIFY_FROM = process.env.NOTIFY_FROM
   , NOTIFY_TO = process.env.NOTIFY_TO;
 
+var WORKER_INTERVAL = 60 * 1000
+  , WORKER_INITIAL_TIMEOUT = 1000
+  , SOCKET_TIMEOUT = 10000
+  , TEMPLATE_TIMEOUT_WARNING = 300;
+
 require('sugar');
 
 var express = require('express')
@@ -127,8 +132,9 @@ app.get('/list', function (req, res, next) {
       res.render('list', {
         websites: websites
       , statuses: Object.map(statuses, function (key, value) { var ret = value.split('|'); ret[2] = moment(ret[2]).fromNow(); return ret; })
-      , timeout_ms: 300
+      , timeout_ms: TEMPLATE_TIMEOUT_WARNING
       , offline: offline
+      , interval: WORKER_INTERVAL
       , message: req.flash('message')
       });
     });
@@ -174,7 +180,7 @@ function _worker() {
             });
           });
           
-          req.setTimeout(5000, function () {
+          req.setTimeout(SOCKET_TIMEOUT, function () {
             req.abort();
           });
           req.end();
@@ -191,11 +197,11 @@ function _worker() {
       
     }, function _forEachComplete() {
       console.log('Worker exited.');
-      setTimeout(_worker, 5000);
+      setTimeout(_worker, WORKER_INTERVAL);
     });
   });
 }
-setTimeout(_worker, 1000);
+setTimeout(_worker, WORKER_INITIAL_TIMEOUT);
 
 
 // -$- Utils -$-

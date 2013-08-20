@@ -6,15 +6,28 @@ block favicon
     link(rel='icon', href='/img/ko.ico?v=2')
 
 block content
+  .jumbotron(style='padding-top: 50px;')
+      h1 Ping
+      p.lead.text-muted Monitor your websites
+
   .row
     .col-lg-6.col-lg-offset-3
-
-      .text-center
-        h3 Create a new Health Check
-        hr
+      
+      p.text-center
+        strong Current status: 
+        span.text-danger
+          strong #{offline} offline
+        |  and 
+        span.text-success
+          strong #{online} online      
+        | &nbsp;
+        a.btn.btn-default.btn-primary.btn-sm(href='/list') details &raquo;
+      
+      p &nbsp;
 
       form.form-horizontal(role='form', method='post', action='/add')
         fieldset
+          legend Create a new Health Check
         
           .form-group
             label.col-lg-3.control-label Name
@@ -30,14 +43,3 @@ block content
             .col-lg-12
               button.btn.btn-default.btn-lg.btn-success.pull-right(type='submit')
                 | Create
-
-      hr
-      
-      p.text-center
-        a(href='/list') Current status:
-        | &nbsp;
-        span.text-danger
-          strong #{offline} offline
-        |  and 
-        span.text-success
-          strong #{online} online

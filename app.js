@@ -4,7 +4,7 @@
 
 var HIPCHAT_TOKEN = process.env.HIPCHAT_TOKEN;
 
-var WORKER_INTERVAL = 60 * 1000
+var WORKER_INTERVAL = 5 * 1000
   , WORKER_INITIAL_TIMEOUT = 1000
   , SOCKET_TIMEOUT = 10000
   , TEMPLATE_TIMEOUT_WARNING = 300;
@@ -23,7 +23,8 @@ var express = require('express')
   
 var app = express()
   , rclient = redis.createClient()
-  , hip = new HipChatClient(HIPCHAT_TOKEN);
+  , hip = new HipChatClient(HIPCHAT_TOKEN)
+  , prev_failing = [];
 
 rclient.on('error', function (err) {
   console.log('REDIS ERROR', err);
@@ -164,6 +165,7 @@ function _worker() {
       throw err;
     }
     
+    var failing = [];
     websites = websites || {};
     
     async.each(Object.keys(websites), function (name, nextEach) {
@@ -202,20 +204,15 @@ function _worker() {
         
         function _complete(status, nextSeries) {
           if (status.ok !== 'ok') {
-            hip.postMessage({
-              room: 'Notifications'
-            , from: 'PingMe'
-            , message: '@luse Status Check Failing for website ' + name + ' at url ' + websites[name] + '. Please investigate.'
-            , message_format: 'text'
-            , notify: 1
-            , color: 'red'
-            }, function (status, err) {
-              if (err) {
-                console.warn('HipChat API Error', err);
-              }
-            });
-              
+            if (prev_failing.indexOf(name) === -1) {
+              // Send only 1st notification
+              _hipNotify('red', 'Status Check Failing for website ' + name + ' at url ' + websites[name] + '. Please investigate.');
+            }
+            
+            failing.push(name);
           }
+          
+          console.log('failing:', failing, prev_failing);
           
           rclient.hset('websites-status', name, [status.ok, status.code, new Date(), status.resptime].join('|'), function () {
             nextSeries();
@@ -226,6 +223,12 @@ function _worker() {
       });
       
     }, function _forEachComplete() {
+      if (prev_failing.length > 0 && failing.length === 0) {
+        _hipNotify('green', 'All websites are now online.');
+      }
+      
+      prev_failing = failing.clone();
+      
       console.log('Worker exited.');
       setTimeout(_worker, WORKER_INTERVAL);
     });
@@ -235,6 +238,22 @@ setTimeout(_worker, WORKER_INITIAL_TIMEOUT);
 
 
 // -$- Utils -$-
+
+function _hipNotify(color, msg) {
+  hip.postMessage({
+    room: 'Notifications'
+  , from: 'PingMe'
+  , message: msg
+  , message_format: 'text'
+  , notify: 1
+  , color: color
+  }, function (status, err) {
+    if (err) {
+      console.warn('HipChat API Error', err);
+    }
+  });
+}
+
 
 function _requireNotEmpty() {
   var ret = true;

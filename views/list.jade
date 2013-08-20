@@ -49,7 +49,7 @@ block content
               td
                 form(action='/delete', method='post')
                   input(type='hidden', name='_method', value='delete')
-                  input(type='hidden', name='name', value=name)
+                  input(type='hidden', name='name', value=website.key)
                   button.btn.btn-xs(type='submit')
                     span.text-muted.glyphicon.glyphicon-trash
               td

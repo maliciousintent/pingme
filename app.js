@@ -164,12 +164,18 @@ function _worker() {
       
       async.waterfall([
         function _request(nextSeries) {
-          var req = http.request(websites[name], function (res) {
-            nextSeries(null, {
-              ok: (res.statusCode === 200) ? 'ok' : 'no'
-            , code: res.statusCode
-            , resptime: new Date().valueOf() - resptime
+          var req = http.request(websites[name]);
+          
+          req.on('response', function (res) {
+            process.nextTick(function () {
+              nextSeries(null, {
+                ok: (res.statusCode === 200) ? 'ok' : 'no'
+              , code: res.statusCode
+              , resptime: new Date().valueOf() - resptime
+              });
             });
+            
+            req.abort();
           });
           
           req.on('error', function (e) {
@@ -183,6 +189,7 @@ function _worker() {
           req.setTimeout(SOCKET_TIMEOUT, function () {
             req.abort();
           });
+          
           req.end();
         },
         

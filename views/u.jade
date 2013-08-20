@@ -1,0 +1,33 @@
+extends layout
+block favicon
+  if offline === 0
+    link(rel='icon', href='/img/ok.ico?v=2')
+  else
+    link(rel='icon', href='/img/ko.ico?v=2')
+
+block content
+  .jumbotron(style='padding-top: 50px; cursor:pointer;', onclick='document.location.href="/list"')
+      h1 Ping
+      p.lead.text-muted Monitor your websites
+
+  .row
+    .col-lg-6.col-lg-offset-3
+      
+      p.text-center
+        if offline === 0
+          span.text-success.glyphicon.glyphicon-ok(style='font-size: 10em;')
+        else
+          span.text-danger.glyphicon.glyphicon-remove(style='font-size: 10em;')
+          br
+          span.text-danger
+            | Currently, #{offline} website(s) seems to be offline
+
+      p &nbsp;
+      p.text-muted.text-center Last updated at #{time}
+      
+
+  script.
+    setInterval(function () {
+      window.location.reload();
+    }, #{interval / 2});
+    

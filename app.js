@@ -150,6 +150,27 @@ app.get('/list', function (req, res, next) {
 });
 
 
+app.get('/u', function (req, res, next) {
+  // Micro status-page
+   
+  rclient.hgetall('websites-status', function (err, statuses) {
+    if (err) {
+      return next(err);
+    }
+    
+    statuses = statuses || {};
+    
+    var offline = Object.sum(Object.map(statuses, function (key, value) { return (value.split('|')[0] === 'ok') ? 0 : 1; }));
+    
+    res.render('u', {
+      offline: offline
+    , interval: WORKER_INTERVAL
+    , time: moment().format('LT')
+    });
+  });
+});
+
+
 http.createServer(app).listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'));
 });

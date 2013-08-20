@@ -70,6 +70,8 @@ block content
       p.text-center.text-muted
         input#autorefresh(type='checkbox', value='1', checked='checked')
         | &nbsp;Autorefresh (every #{interval / 2 / 1000}s)
+        | &ndash; 
+        a.btn.btn-default.btn-xs(href='/u') Micro status-page &raquo;
         
         
   script.
@@ -78,3 +80,4 @@ block content
         window.location.reload();
       }
     }, #{interval / 2});
+    

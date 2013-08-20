@@ -14,6 +14,7 @@ require('sugar');
 
 var express = require('express')
   , http = require('http')
+  , https = require('https')
   , path = require('path')
   , redis = require('redis')
   , moment = require('moment')
@@ -164,7 +165,7 @@ function _worker() {
       
       async.waterfall([
         function _request(nextSeries) {
-          var req = http.request(websites[name]);
+          var req = ((websites[name].indexOf('https://') === 0) ? https : http).request(websites[name]);
           
           req.on('response', function (res) {
             process.nextTick(function () {

@@ -2,8 +2,7 @@
 
 'use strict';
 
-var NOTIFY_FROM = process.env.NOTIFY_FROM
-  , NOTIFY_TO = process.env.NOTIFY_TO;
+var HIPCHAT_TOKEN = process.env.HIPCHAT_TOKEN;
 
 var WORKER_INTERVAL = 60 * 1000
   , WORKER_INITIAL_TIMEOUT = 1000
@@ -19,10 +18,12 @@ var express = require('express')
   , redis = require('redis')
   , moment = require('moment')
   , async = require('async')
-  , flash = require('connect-flash');
+  , flash = require('connect-flash')
+  , HipChatClient = require('node-hipchat');
   
 var app = express()
-  , rclient = redis.createClient();
+  , rclient = redis.createClient()
+  , hip = new HipChatClient(HIPCHAT_TOKEN);
 
 rclient.on('error', function (err) {
   console.log('REDIS ERROR', err);
@@ -200,6 +201,22 @@ function _worker() {
         },
         
         function _complete(status, nextSeries) {
+          if (status.ok !== 'ok') {
+            hip.postMessage({
+              room: 'Notifications'
+            , from: 'PingMe'
+            , message: '@luse Status Check Failing for website ' + name + ' at url ' + websites[name] + '. Please investigate.'
+            , message_format: 'text'
+            , notify: 1
+            , color: 'red'
+            }, function (status, err) {
+              if (err) {
+                console.warn('HipChat API Error', err);
+              }
+            });
+              
+          }
+          
           rclient.hset('websites-status', name, [status.ok, status.code, new Date(), status.resptime].join('|'), function () {
             nextSeries();
           });

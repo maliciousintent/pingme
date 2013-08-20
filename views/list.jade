@@ -44,8 +44,8 @@ block content
             th Last check
             th.text-center Status
         tbody
-          for url, name in websites
-            tr(class="#{(statuses[name] && statuses[name][0] !== 'ok') ? 'danger' : ''}")
+          for website in websites
+            tr(class="#{(statuses[website.key] && statuses[website.key][0] !== 'ok') ? 'danger' : ''}")
               td
                 form(action='/delete', method='post')
                   input(type='hidden', name='_method', value='delete')
@@ -53,13 +53,13 @@ block content
                   button.btn.btn-xs(type='submit')
                     span.text-muted.glyphicon.glyphicon-trash
               td
-                a(href='#{url}', target='_blank') #{name}
-              td #{statuses[name] && statuses[name][1]}
-              td #{statuses[name] && statuses[name][3]} ms
-              td #{statuses[name] && statuses[name][2]}
+                a(href='#{website.value}', target='_blank') #{website.key}
+              td #{statuses[website.key] && statuses[website.key][1]}
+              td #{statuses[website.key] && statuses[website.key][3]} ms
+              td #{statuses[website.key] && statuses[website.key][2]}
               td.text-center
-                if statuses[name] && statuses[name][0] === 'ok'
-                  if statuses[name] && statuses[name][2] > timeout_ms
+                if statuses[website.key] && statuses[website.key][0] === 'ok'
+                  if statuses[website.key] && statuses[website.key][2] > timeout_ms
                     span.text-warning.glyphicon.glyphicon-time
                   else
                     span.text-success.glyphicon.glyphicon-ok

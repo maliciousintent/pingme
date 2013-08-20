@@ -113,7 +113,12 @@ app.get('/list', function (req, res, next) {
       return next(err);
     }
     
+    var a_websites = [];
     websites = websites || {};
+    
+    Object.keys(websites).forEach(function (key) {
+      a_websites.push({ key: key, value: websites[key] });
+    });
     
     rclient.hgetall('websites-status', function (err, statuses) {
       if (err) {
@@ -131,7 +136,7 @@ app.get('/list', function (req, res, next) {
       }), function (a, b) { return a + b; }, 0);    
       
       res.render('list', {
-        websites: websites
+        websites: a_websites.sortBy(function (row) { return [statuses[row.key].split('|')[0], row.key]; })
       , statuses: Object.map(statuses, function (key, value) { var ret = value.split('|'); ret[2] = moment(ret[2]).fromNow(); return ret; })
       , timeout_ms: TEMPLATE_TIMEOUT_WARNING
       , offline: offline

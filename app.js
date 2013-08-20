@@ -136,7 +136,7 @@ app.get('/list', function (req, res, next) {
       }), function (a, b) { return a + b; }, 0);    
       
       res.render('list', {
-        websites: a_websites.sortBy(function (row) { return [statuses[row.key].split('|')[0], row.key]; })
+        websites: a_websites.sortBy(function (row) { return [('string' === typeof statuses[row.key]) ? statuses[row.key].split('|')[0]: 'unknown', row.key]; })
       , statuses: Object.map(statuses, function (key, value) { var ret = value.split('|'); ret[2] = moment(ret[2]).fromNow(); return ret; })
       , timeout_ms: TEMPLATE_TIMEOUT_WARNING
       , offline: offline
